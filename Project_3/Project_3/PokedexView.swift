@@ -12,19 +12,30 @@ import UIKit
 import UIKit
 
 class GridViewController: UIViewController {
-
+    
     enum Section {
         case main
     }
-
-    var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
+    
+    var dataSource: UICollectionViewDiffableDataSource<Section, PokemonEntry>! = nil
     var collectionView: UICollectionView! = nil
-
+    let vm = PokedexViewModel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = "Grid"
+        navigationItem.title = "Pokédex"
         configureHierarchy()
         configureDataSource()
+        vm.onDataUpdated = { [weak self] in
+            self?.applySnapshot()
+        }
+        vm.fetchAllData()
+    }
+    private func applySnapshot() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, PokemonEntry>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(vm.pokemon)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
@@ -56,26 +67,22 @@ extension GridViewController {
     }
     private func configureDataSource() {
         
-        let cellRegistration = UICollectionView.CellRegistration<TextCell, Int> { (cell, indexPath, identifier) in
-            // Populate the cell with our item description.
-            cell.label.text = "\(identifier)"
+        let cellRegistration = UICollectionView.CellRegistration<PokedexCell, PokemonEntry> { (cell, indexPath, identifier) in
+            cell.configure(entry: identifier)
             cell.contentView.backgroundColor = .systemBlue
             cell.layer.borderColor = UIColor.black.cgColor
             cell.layer.borderWidth = 1
-            cell.label.textAlignment = .center
             cell.label.font = UIFont.preferredFont(forTextStyle: .title1)
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Int>(collectionView: collectionView) {
-            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Int) -> UICollectionViewCell? in
+        dataSource = UICollectionViewDiffableDataSource<Section, PokemonEntry>(collectionView: collectionView) {
+            (collectionView: UICollectionView, indexPath: IndexPath, entry: PokemonEntry) -> UICollectionViewCell? in
             // Return the cell.
-            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: entry)
         }
-
         // initial data
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, PokemonEntry>()
         snapshot.appendSections([.main])
-        snapshot.appendItems(Array(0..<94))
         dataSource.apply(snapshot, animatingDifferences: false)
     }
 }

@@ -1,32 +1,60 @@
 
+//
+//  PokedexCell.swift
+//  Project_3
+//
+//  Created by Smith01, Griffin on 4/13/26.
+//
 import UIKit
+import Alamofire
 
-class TextCell: UICollectionViewCell {
-    let label = UILabel()
-    static let reuseIdentifier = "text-cell-reuse-identifier"
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configure()
-    }
-    required init?(coder: NSCoder) {
-        fatalError("not implemnted")
-    }
-
+struct PokemonListResponse : Codable {
+    let count: Int
+    let next: String?
+    let previous: String?
+    var results: [PokemonEntry]
 }
-
-extension TextCell {
-    func configure() {
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.adjustsFontForContentSizeCategory = true
-        contentView.addSubview(label)
-        label.font = UIFont.preferredFont(forTextStyle: .caption1)
-        let inset = CGFloat(10)
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: inset),
-            label.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -inset),
-            label.topAnchor.constraint(equalTo: contentView.topAnchor, constant: inset),
-            label.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -inset)
-            ])
+struct PokemonEntry : Codable, Hashable {
+    let name: String
+    let url: String
+    //https://stackoverflow.com/questions/43118687/split-url-query-in-swift
+    var id: Int? {
+        let components = url.split(separator: "/")
+        return Int(components.last ?? "")
+    }
+    var spriteURL: URL? {
+        if let id {
+            return URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/\(id).png") } else {
+                return nil
+        }
     }
 }
+    
+    class PokedexViewModel : NSObject {
+        
+        var pokemon : [PokemonEntry] = []
+        var onDataUpdated: (() -> Void)?
+        
+        override init() {
+            super.init()
+//            fetchAllData(completion: nil)
+        }
+        
+        
+        // Swift auto suggested this function
+        func fetchAllData(completion: (() -> Void)? = nil) {
+            let urlString = "https://pokeapi.co/api/v2/pokemon/?limit=151"
+            print("Test")
+            AF.request(urlString).responseDecodable(of: PokemonListResponse.self) { response in
+                switch response.result {
+                case .success(let listResponse):
+                    self.pokemon = listResponse.results
+                    DispatchQueue.main.async {
+                        self.onDataUpdated?()
+                    }
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        }
+    }
