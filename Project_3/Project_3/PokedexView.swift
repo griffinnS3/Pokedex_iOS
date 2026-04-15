@@ -11,7 +11,7 @@ import UIKit
 
 import UIKit
 
-class GridViewController: UIViewController {
+class GridViewController: UIViewController, UICollectionViewDelegate {
     
     enum Section {
         case main
@@ -63,6 +63,7 @@ extension GridViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .black
+        collectionView.delegate = self
         view.addSubview(collectionView)
     }
     private func configureDataSource() {
@@ -84,5 +85,13 @@ extension GridViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Section, PokemonEntry>()
         snapshot.appendSections([.main])
         dataSource.apply(snapshot, animatingDifferences: false)
+    }
+}
+extension GridViewController {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let entry = dataSource.itemIdentifier(for: indexPath) {
+            let detailViewController = PokemonDetailView(pokemon: entry)
+            navigationController?.pushViewController(detailViewController, animated: true)
+        }
     }
 }
