@@ -42,18 +42,19 @@ class GridViewController: UIViewController, UICollectionViewDelegate {
 extension GridViewController {
     /// - Tag: Grid
     private func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.2),
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
                                              heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                              heightDimension: .fractionalWidth(0.2))
+                                              heightDimension: .fractionalWidth(0.5))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
                                                          subitems: [item])
 
         let section = NSCollectionLayoutSection(group: group)
 
         let layout = UICollectionViewCompositionalLayout(section: section)
+
         return layout
     }
 }
@@ -73,7 +74,8 @@ extension GridViewController {
             cell.contentView.backgroundColor = .systemBlue
             cell.layer.borderColor = UIColor.black.cgColor
             cell.layer.borderWidth = 1
-            cell.label.font = UIFont.preferredFont(forTextStyle: .title1)
+            //https://www.dafont.com/pokemon.font
+            cell.label.font = UIFont(name: "PokemonSolidNormal", size: 48)
         }
         
         dataSource = UICollectionViewDiffableDataSource<Section, PokemonEntry>(collectionView: collectionView) {

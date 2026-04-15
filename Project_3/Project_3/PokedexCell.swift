@@ -10,16 +10,26 @@ class PokedexCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.addSubview(imageView)
         contentView.addSubview(label)
+        contentView.addSubview(imageView)
+        label.textAlignment = .center
+        //https://blog.devgenius.io/creating-stroked-labels-with-uikit-a-how-to-guide-7a024652e978
+        label.attributedText = NSAttributedString(string: "Backed", attributes: [
+            .strokeColor: UIColor.black,
+            .foregroundColor: UIColor.white,
+            .font: UIFont.systemFont(ofSize: 25, weight: .semibold),
+            .strokeWidth: -5
+        ])
+        label.textColor = .white
         imageView.snp.makeConstraints { make in
             make.top.equalTo(safeAreaLayoutGuide)
-            make.height.equalToSuperview().inset(16)
+            make.height.equalTo(imageView.snp.width).inset(40)
             make.width.equalToSuperview()
         }
         label.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom)
             make.width.equalToSuperview()
+            make.bottom.equalToSuperview()
         }
     }
     required init?(coder: NSCoder) {
@@ -38,4 +48,5 @@ class PokedexCell: UICollectionViewCell {
             )
         }
     }
+    
 }
