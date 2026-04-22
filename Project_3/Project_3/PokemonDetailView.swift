@@ -57,6 +57,12 @@ class PokemonDetailView: UIViewController {
         navigationItem.title = pokemon.name.capitalized
         configureHierarchy()
         configureDataSource()
+            
+            if let spriteURL = pokemon.spriteURL {
+                imageView.kf.setImage (with: spriteURL,
+                 placeholder: UIImage(systemName: "photo"),
+                 options: [.transition(.fade(0.3))])
+            }
         
         vm.onDataUpdated = { [weak self] in
 
