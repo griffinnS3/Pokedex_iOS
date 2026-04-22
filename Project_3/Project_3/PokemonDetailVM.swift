@@ -87,39 +87,65 @@ class PokemonDetailViewModel: NSObject {
     
     var detail: PokemonDetail?
     var onDataUpdated: (() -> Void)?
+    // I got help from claude to fetch the data and cache it
+    static var cache: [String: PokemonDetail] = [:]
+    let fetchGroup = DispatchGroup()
+    var isFetching = false
     
-    // Convenience accessors for the view
-    var typesDisplay: String {
-        detail?.types
-            .sorted { $0.slot < $1.slot }
-            .map { $0.type.name.capitalized }
-            .joined(separator: " / ") ?? ""
-    }
     
-    var statsDisplay: [(name: String, value: Int)] {
-        detail?.stats.map { ($0.stat.name.capitalized, $0.baseStat) } ?? []
-    }
-    
-    var movesDisplay: [String] {
-        detail?.moves.map { $0.move.name.capitalized } ?? []
-    }
-    
-    var abilitiesDisplay: [(name: String, isHidden: Bool)] {
-        detail?.abilities.map { ($0.ability.name.capitalized, $0.isHidden) } ?? []
-    }
-    
-    func fetchDetail(from url: String) {
+    func fetchDetail(from url: String, retryCount: Int = 0) {
+        if let cached = Self.cache[url] {
+            print("Cache hit for \(url)")
+            self.detail = cached
+            DispatchQueue.main.async {
+                self.onDataUpdated?()
+            }
+            return
+        }
+        
+        guard !isFetching else { return }
+        isFetching = true
+        
         AF.request(url).responseDecodable(of: PokemonDetail.self) { response in
+            self.isFetching = false
             switch response.result {
             case .success(let detail):
+                print("Fetched: \(detail.name)")
+                Self.cache[url] = detail
                 self.detail = detail
                 DispatchQueue.main.async {
                     self.onDataUpdated?()
                 }
             case .failure(let error):
-                print("Failed to fetch detail: \(error)")
+                print("Failed: \(error)")
             }
         }
+    }
+}
+extension PokemonDetailView {
+    func applySnapshot() {
+        guard let detail = vm.detail else {
+            print("applySnapshot called but vm.detail is nil")
+            return
+        }
+        
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        snapshot.appendSections([.main])
+        
+        snapshot.appendItems(
+            detail.types.sorted { $0.slot < $1.slot }.map { .type($0.type.name.capitalized) }
+        )
+        snapshot.appendItems(
+            detail.stats.map { .stat(name: $0.stat.name.capitalized, value: $0.baseStat) }
+        )
+        snapshot.appendItems(
+            detail.abilities.map { .ability(name: $0.ability.name.capitalized, isHidden: $0.isHidden) }
+        )
+        snapshot.appendItems(
+            detail.moves.map { .move($0.move.name.capitalized) }
+        )
+        
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 

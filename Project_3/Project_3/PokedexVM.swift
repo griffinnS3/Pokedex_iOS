@@ -30,31 +30,31 @@ struct PokemonEntry : Codable, Hashable {
     }
 }
     
-    class PokedexViewModel : NSObject {
+class PokedexViewModel: NSObject {
+    
+    var pokemon: [PokemonEntry] = []
+    var onDataUpdated: (() -> Void)?
+    var onPrefetchComplete: (() -> Void)?
+    
+    private let fetchGroup = DispatchGroup()
+    
+    override init() {
+        super.init()
+    }
+    
+    func fetchAllData() {
+        let urlString = "https://pokeapi.co/api/v2/pokemon/?limit=151"
         
-        var pokemon : [PokemonEntry] = []
-        var onDataUpdated: (() -> Void)?
-        
-        override init() {
-            super.init()
-//            fetchAllData(completion: nil)
-        }
-        
-        
-        // Swift auto suggested this function
-        func fetchAllData(completion: (() -> Void)? = nil) {
-            let urlString = "https://pokeapi.co/api/v2/pokemon/?limit=151"
-            print("Test")
-            AF.request(urlString).responseDecodable(of: PokemonListResponse.self) { response in
-                switch response.result {
-                case .success(let listResponse):
-                    self.pokemon = listResponse.results
-                    DispatchQueue.main.async {
-                        self.onDataUpdated?()
-                    }
-                case .failure(let error):
-                    print(error)
+        AF.request(urlString).responseDecodable(of: PokemonListResponse.self) { response in
+            switch response.result {
+            case .success(let listResponse):
+                self.pokemon = listResponse.results
+                DispatchQueue.main.async {
+                    self.onDataUpdated?()
                 }
+            case .failure(let error):
+                print("Failed to fetch list: \(error)")
             }
         }
     }
+}

@@ -26,6 +26,7 @@ class GridViewController: UIViewController, UICollectionViewDelegate {
         navigationItem.title = "Pokédex"
         configureHierarchy()
         configureDataSource()
+        //Claude helped me with updating the view
         vm.onDataUpdated = { [weak self] in
             self?.applySnapshot()
         }
@@ -80,7 +81,6 @@ extension GridViewController {
         
         dataSource = UICollectionViewDiffableDataSource<Section, PokemonEntry>(collectionView: collectionView) {
             (collectionView: UICollectionView, indexPath: IndexPath, entry: PokemonEntry) -> UICollectionViewCell? in
-            // Return the cell.
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: entry)
         }
         // initial data
@@ -91,9 +91,8 @@ extension GridViewController {
 }
 extension GridViewController {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if let entry = dataSource.itemIdentifier(for: indexPath) {
-            let detailViewController = PokemonDetailView(pokemon: entry)
-            navigationController?.pushViewController(detailViewController, animated: true)
-        }
+        guard let entry = dataSource.itemIdentifier(for: indexPath) else { return }
+        let detailVC = PokemonDetailView(pokemon: entry)
+        self.navigationController?.pushViewController(detailVC, animated: true)
     }
 }

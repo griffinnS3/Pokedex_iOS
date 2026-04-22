@@ -1,38 +1,36 @@
-//
-//  PokemonDetailCell.swift
-//  Project_3
-//
-//  Created by Eddie Slobodow on 4/20/26.
-//
-
 import UIKit
 
-class TextCell: UICollectionViewCell {
-    let label = UILabel()
-    static let reuseIdentifier = "text-cell-reuse-identifier"
-
+class DebugCell: UICollectionViewCell {
+    
+    private let label = UILabel()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configure()
-    }
-    required init?(coder: NSCoder) {
-        fatalError("not implemnted")
-    }
-
-}
-
-extension TextCell {
-    func configure() {
+        
+        contentView.backgroundColor = .secondarySystemBackground
+        contentView.layer.cornerRadius = 8
+        contentView.layer.borderWidth = 1
+        contentView.layer.borderColor = UIColor.separator.cgColor
+        
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.adjustsFontForContentSizeCategory = true
+        label.numberOfLines = 0
+        label.font = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        label.textColor = .label
+        label.textAlignment = .center
+        
         contentView.addSubview(label)
-        label.font = UIFont.preferredFont(forTextStyle: .caption1)
-        let inset = CGFloat(10)
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: inset),
-            label.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -inset),
-            label.topAnchor.constraint(equalTo: contentView.topAnchor, constant: inset),
-            label.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -inset)
-            ])
+            label.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+            label.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4),
+            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 6),
+            label.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -6)
+        ])
+    }
+    
+    required init?(coder: NSCoder) { fatalError("not implemented") }
+    
+    func configure(text: String, color: UIColor = .secondarySystemBackground) {
+        label.text = text
+        contentView.backgroundColor = color
     }
 }
