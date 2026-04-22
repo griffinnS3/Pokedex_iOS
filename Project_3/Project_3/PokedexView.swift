@@ -5,7 +5,7 @@
 //  Created by Smith01, Griffin on 4/13/26.
 //
 
-import UIKit
+
 
 //From Apples Sample Code on Modern Collection Views
 
@@ -20,23 +20,34 @@ class GridViewController: UIViewController, UICollectionViewDelegate {
     var dataSource: UICollectionViewDiffableDataSource<Section, PokemonEntry>! = nil
     var collectionView: UICollectionView! = nil
     let vm = PokedexViewModel()
+    let loadMoreButton = UIBarButtonItem()
+    var counter = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Pokédex"
+        loadMoreButton.title = "Load More"
+        loadMoreButton.target = self
+        loadMoreButton.action = #selector(loadMoreButtonTapped)
+        navigationItem.rightBarButtonItem = loadMoreButton
         configureHierarchy()
         configureDataSource()
         //Claude helped me with updating the view
         vm.onDataUpdated = { [weak self] in
             self?.applySnapshot()
         }
-        vm.fetchAllData()
+        vm.fetchAllData(counter: 0)
     }
     private func applySnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, PokemonEntry>()
         snapshot.appendSections([.main])
         snapshot.appendItems(vm.pokemon)
         dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    @objc func loadMoreButtonTapped() {
+        counter+=20
+        vm.fetchAllData(counter: counter)
+        applySnapshot()
     }
 }
 

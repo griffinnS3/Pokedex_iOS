@@ -42,13 +42,13 @@ class PokedexViewModel: NSObject {
         super.init()
     }
     
-    func fetchAllData() {
-        let urlString = "https://pokeapi.co/api/v2/pokemon/?limit=151"
+    func fetchAllData(counter: Int) {
+        let urlString = "https://pokeapi.co/api/v2/pokemon/?limit=20&offset=\(counter)"
         
         AF.request(urlString).responseDecodable(of: PokemonListResponse.self) { response in
             switch response.result {
             case .success(let listResponse):
-                self.pokemon = listResponse.results
+                self.pokemon.append(contentsOf: listResponse.results)
                 DispatchQueue.main.async {
                     self.onDataUpdated?()
                 }
