@@ -33,12 +33,4 @@ class DebugCell: UICollectionViewCell {
         label.text = text
         contentView.backgroundColor = color
     }
-    
-    private let imageView = UIImageView()
-        
-    func configure(imageURL: URL) {
-        imageView.kf.setImage (with: imageURL,
-                               placeholder: UIImage(systemName: "photo"),
-                               options: [.transition(.fade(0.3))])
-    }
 }
