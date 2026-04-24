@@ -25,6 +25,7 @@ class PokemonDetailView: UIViewController {
     let imageView = UIImageView()
     let nameLabel = UILabel()
     let vm = PokemonDetailViewModel()
+    let background = UILabel()
     
     enum Section {
         case main
@@ -137,10 +138,31 @@ extension PokemonDetailView {
 
 extension PokemonDetailView {
    func configureHierarchy() {
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+       view.addSubview(background)
+       view.addSubview(imageView)
+       imageView.snp.makeConstraints { make in
+           make.top.equalTo(view.safeAreaLayoutGuide)
+           make.centerX.equalToSuperview()
+           make.width.equalTo(view.safeAreaLayoutGuide).dividedBy(3)
+           make.height.equalTo(200)
+       }
+       background.backgroundColor = .systemBackground
+       background.snp.makeConstraints { make in
+           make.width.equalTo(view.safeAreaLayoutGuide)
+           make.centerX.equalToSuperview()
+           make.top.equalTo(imageView.snp.top)
+           make.bottom.equalTo(imageView.snp.bottom)
+       }
+       imageView.backgroundColor = .systemBackground
+       collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemBackground
         view.addSubview(collectionView)
+       collectionView.snp.makeConstraints { make in
+           make.top.equalTo(imageView.snp.bottom)
+           make.bottom.equalToSuperview()
+           make.leading.trailing.equalToSuperview()
+       }
         collectionView.delegate = self
     }
     func configureDataSource() {
