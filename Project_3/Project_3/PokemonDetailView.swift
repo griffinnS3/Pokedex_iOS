@@ -34,6 +34,7 @@ class PokemonDetailView: UIViewController {
         case stat(name: String, value: Int)
         case ability(name: String, isHidden: Bool)
         case move(String)
+        case frontDefault(URL)
     }
 
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>! = nil
@@ -47,16 +48,6 @@ class PokemonDetailView: UIViewController {
         
     }
     override func viewDidLoad() {
-        /*view.backgroundColor = .systemBackground
-        navigationItem.title = pokemon.name
-        view.addSubview(imageView)
-        view.addSubview(nameLabel)
-        nameLabel.text = pokemon.name
-        
-        if let spriteURL = pokemon.spriteURL {
-            imageView.kf.setImage(with: spriteURL, placeholder: UIImage(systemName: "photo"),
-                                  options: [.transition(.fade(0.3))])
-        }*/
         
         super.viewDidLoad()
         navigationItem.title = pokemon.name.capitalized
@@ -80,25 +71,6 @@ class PokemonDetailView: UIViewController {
 
 extension PokemonDetailView {
 
-    //   +-----------------------------------------------------+
-    //   | +---------------------------------+  +-----------+  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  |     1     |  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  +-----------+  |
-    //   | |               0                 |                 |
-    //   | |                                 |  +-----------+  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  |     2     |  |
-    //   | |                                 |  |           |  |
-    //   | |                                 |  |           |  |
-    //   | +---------------------------------+  +-----------+  |
-    //   +-----------------------------------------------------+
-
-    /// - Tag: Nested
     func createLayout() -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout {
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
@@ -155,6 +127,8 @@ extension PokemonDetailView {
                 cell.configure(text: "ABILITY\n\(name)\n\(isHidden ? "(hidden)" : "")", color: .systemPurple.withAlphaComponent(0.2))
             case .move(let name):
                 cell.configure(text: "MOVE\n\(name)", color: .systemOrange.withAlphaComponent(0.2))
+            case .frontDefault(let image):
+                cell.configure(imageURL: image)
             }
         }
         
@@ -165,7 +139,7 @@ extension PokemonDetailView {
 
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections([.main])
-        snapshot.appendItems([.type("Grass"), .type("Poison"), .stat(name: "HP", value: 45), .move("Tackle")])
+        snapshot.appendItems([.frontDefault(URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png")!), .type("Grass"), .type("Poison"), .stat(name: "HP", value: 45), .move("Tackle")],)
         dataSource.apply(snapshot, animatingDifferences: false)
     }}
 

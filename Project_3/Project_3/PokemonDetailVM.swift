@@ -17,6 +17,7 @@ struct PokemonDetail: Codable {
     let stats: [StatEntry]
     let abilities: [AbilitySlot]
     let moves: [MoveEntry]
+    let sprites: [Sprite]
 
 
 enum CodingKeys: String, CodingKey {
@@ -29,9 +30,17 @@ enum CodingKeys: String, CodingKey {
     case stats
     case abilities
     case moves
+    case sprites
     }
 }
 
+struct Sprite: Codable {
+    let frontDefault: URL
+    
+    enum CodingKeys: String, CodingKey {
+        case frontDefault = "front_default"
+    }
+}
 struct TypeSlot: Codable {
     let slot: Int
     let type: PokemonType
