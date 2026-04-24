@@ -4,16 +4,10 @@
 //
 //  Created by Smith01, Griffin on 4/15/26.
 //
-import UIKit
+/*import UIKit
 import Kingfisher
 import SnapKit
 
-// Taken from Apples sample code
-
-enum Section {
-    case leading
-    case trailing
-}
 
 class PokemonDetailView: UIViewController {
     
@@ -24,26 +18,18 @@ class PokemonDetailView: UIViewController {
     let pokemon: PokemonEntry
     let imageView = UIImageView()
     let nameLabel = UILabel()
-    let vm = PokemonDetailViewModel()
     
     enum Section {
         case main
     }
-    enum Item: Hashable {
-        case type(String)
-        case stat(name: String, value: Int)
-        case ability(name: String, isHidden: Bool)
-        case move(String)
-    }
 
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>! = nil
+    var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
     var collectionView: UICollectionView! = nil
     
     
     init(pokemon: PokemonEntry) {
         self.pokemon = pokemon
         super.init(nibName: nil, bundle: nil)
-        print("Detail view created for: \(pokemon.name)")
         
     }
     override func viewDidLoad() {
@@ -59,21 +45,9 @@ class PokemonDetailView: UIViewController {
         }*/
         
         super.viewDidLoad()
-        navigationItem.title = pokemon.name.capitalized
+        navigationItem.title = "Nested Groups"
         configureHierarchy()
         configureDataSource()
-            
-            if let spriteURL = pokemon.spriteURL {
-                imageView.kf.setImage (with: spriteURL,
-                 placeholder: UIImage(systemName: "photo"),
-                 options: [.transition(.fade(0.3))])
-            }
-        
-        vm.onDataUpdated = { [weak self] in
-
-            self?.applySnapshot()
-        }
-        vm.fetchDetail(from: pokemon.url)
     }
     
 }
@@ -104,30 +78,24 @@ extension PokemonDetailView {
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
 
             let leadingItem = NSCollectionLayoutItem(
-                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .fractionalHeight(0.28)))
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.7),
+                                                  heightDimension: .fractionalHeight(1.0)))
             leadingItem.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
 
             let trailingItem = NSCollectionLayoutItem(
                 layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .fractionalHeight(0.14)))
+                                                  heightDimension: .fractionalHeight(0.3)))
             trailingItem.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-            let leadingGroup = NSCollectionLayoutGroup.vertical(
-                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
-                                                   heightDimension: .fractionalHeight(1.0)),
-                repeatingSubitem: leadingItem,
-                count: 3)
             let trailingGroup = NSCollectionLayoutGroup.vertical(
-                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.3),
                                                    heightDimension: .fractionalHeight(1.0)),
                 repeatingSubitem: trailingItem,
-                count: 6)
+                count: 4)
             let nestedGroup = NSCollectionLayoutGroup.horizontal(
                 layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .fractionalHeight(0.9)),
-                subitems: [leadingGroup, trailingGroup])
+                                                  heightDimension: .fractionalHeight(0.4)),
+                subitems: [leadingItem, trailingGroup])
             let section = NSCollectionLayoutSection(group: nestedGroup)
-            section.orthogonalScrollingBehavior = .continuous
             return section
 
         }
@@ -145,29 +113,36 @@ extension PokemonDetailView {
     }
     func configureDataSource() {
         
-        let cellRegistration = UICollectionView.CellRegistration<DebugCell, Item> { (cell, indexPath, item) in
-            switch item {
-            case .type(let name):
-                cell.configure(text: "TYPE\n\(name)", color: .systemBlue.withAlphaComponent(0.2))
-            case .stat(let name, let value):
-                cell.configure(text: "\(name)\n\(value)", color: .systemGreen.withAlphaComponent(0.2))
-            case .ability(let name, let isHidden):
-                cell.configure(text: "ABILITY\n\(name)\n\(isHidden ? "(hidden)" : "")", color: .systemPurple.withAlphaComponent(0.2))
-            case .move(let name):
-                cell.configure(text: "MOVE\n\(name)", color: .systemOrange.withAlphaComponent(0.2))
-            }
+        let cellRegistration = UICollectionView.CellRegistration<TextCell, Int> { (cell, indexPath, identifier) in
+            // Populate the cell with our item description.
+            cell.label.text = "\(indexPath.section), \(indexPath.item)"
+            
+            // will have a case for each cell
+            /*switch indexPath.item {
+                case
+            }*/
+            
+            cell.contentView.backgroundColor = .blue
+            cell.contentView.layer.borderColor = UIColor.black.cgColor
+            cell.contentView.layer.borderWidth = 1
+            cell.contentView.layer.cornerRadius = 8
+            cell.label.textAlignment = .center
+            cell.label.font = UIFont.preferredFont(forTextStyle: .title1)
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) {
-            (collectionView: UICollectionView, indexPath: IndexPath, item: Item) -> UICollectionViewCell? in
-            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+        dataSource = UICollectionViewDiffableDataSource<Section, Int>(collectionView: collectionView) {
+            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Int) -> UICollectionViewCell? in
+            // Return the cell.
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
         }
 
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems([.type("Grass"), .type("Poison"), .stat(name: "HP", value: 45), .move("Tackle")])
+        // initial data
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
+        snapshot.appendSections([Section.main])
+        snapshot.appendItems(Array(0..<5))
         dataSource.apply(snapshot, animatingDifferences: false)
-    }}
+    }
+}
 
 extension PokemonDetailView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -175,3 +150,5 @@ extension PokemonDetailView: UICollectionViewDelegate {
     }
 }
 
+
+*/
